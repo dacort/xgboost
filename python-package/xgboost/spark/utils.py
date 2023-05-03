@@ -10,7 +10,7 @@ from pyspark import BarrierTaskContext, SparkContext
 from pyspark.sql.session import SparkSession
 
 from xgboost import collective
-from xgboost.tracker import RabitTracker
+from xgboost.tracker import RabitTracker, get_host_ip
 
 
 def get_class_name(cls: Type) -> str:
@@ -58,7 +58,7 @@ class CommunicatorContext:
 def _start_tracker(context: BarrierTaskContext, n_workers: int) -> Dict[str, Any]:
     """Start Rabit tracker with n_workers"""
     env: Dict[str, Any] = {"DMLC_NUM_WORKER": n_workers}
-    host = _get_host_ip(context)
+    host = get_host_ip(context)
     rabit_context = RabitTracker(host_ip=host, n_workers=n_workers)
     env.update(rabit_context.worker_envs())
     rabit_context.start(n_workers)
@@ -72,12 +72,6 @@ def _get_rabit_args(context: BarrierTaskContext, n_workers: int) -> Dict[str, An
     """Get rabit context arguments to send to each worker."""
     env = _start_tracker(context, n_workers)
     return env
-
-
-def _get_host_ip(context: BarrierTaskContext) -> str:
-    """Gets the hostIP for Spark. This essentially gets the IP of the first worker."""
-    task_ip_list = [info.address.split(":")[0] for info in context.getTaskInfos()]
-    return task_ip_list[0]
 
 
 def _get_spark_session() -> SparkSession:
