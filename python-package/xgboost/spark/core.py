@@ -870,7 +870,7 @@ class _SparkXGBEstimator(Estimator, _SparkXGBParams, MLReadable, MLWritable):
                     dmatrix_kwargs,
                 )
 
-                _rabit_args = _get_rabit_args(context, num_workers)
+                _rabit_args = _get_rabit_args(num_workers)
 
             worker_message = {
                 "rabit_msg": _rabit_args,
